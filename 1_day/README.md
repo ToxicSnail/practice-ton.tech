@@ -1,4 +1,4 @@
-# practice1
+# day 1
 
 ## Project structure
 
