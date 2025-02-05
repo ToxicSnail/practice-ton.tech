@@ -16,7 +16,7 @@ Thus, to successfully host a token, you need to:
   6. `setJettonWallet.ts`
   7. After this, when you send Ton to the contract, you receive your token.
 
-## Opcode Parsing in TON Blockchain
+# Opcode Parsing in TON Blockchain
 
 ## Example:
 `x{7362D09C6038CB0EF1E046B9405F5E1008006CF8FEA883AE8C3654DE211038D905310DEF04300911C86BFE84D6FBC75DB780}`
