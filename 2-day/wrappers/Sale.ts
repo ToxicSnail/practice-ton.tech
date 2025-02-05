@@ -38,7 +38,7 @@ export class SaleContract implements Contract {
         });
     }
 
-    async receiveTons(
+    async sendReceiveTons(
         provider: ContractProvider,
         via: Sender,
     ) {
