@@ -14,7 +14,7 @@ In the **TON** blockchain network, the goal was to implement a `jetton_wallet` t
 ### Visual Diagram
 A detailed description of the `jetton_wallet` structure and workflow can be found in the image below:
 
-![Jetton Wallet in TON](sheme.png)
+![Jetton Wallet in TON](scheme.png)
 
 ### Main Files:
 - `sale.fc` – smart contract for exchanging tokens for TON.
