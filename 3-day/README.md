@@ -1,6 +1,6 @@
 # 3-day
 
-- Today, we continued working on the code from [[2-day]], specifically implementing:
+- Today, we continued working on the code from [2-day](https://github.com/ToxicSnail/practice-ton.tech/tree/main/2-day), specifically implementing:
   - Wrote the script [receive_money.ts](https://github.com/ToxicSnail/practice-ton.tech/blob/main/2-day/scripts/receive_money.ts "receive_money.ts"), which returns all remaining funds from the contract to the account.
   - Finalized [sale.fc](https://github.com/ToxicSnail/practice-ton.tech/blob/main/2-day/contracts/sale.fc "sale.fc"); the issue was incorrect message formation: the opcode must be 64-bit.
   - After modifying `sale.fc`, we also changed `deploySale`.
