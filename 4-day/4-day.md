@@ -67,7 +67,7 @@ The `seed` is fixed within a single block, and if one bet wins, all bets in the 
 
 ## The attack contract code is offered in the repository
 
-# Simplified Attack Scheme
+## Simplified Attack Scheme
 
 In reality, there will be around 500 transactions in one block.
 
