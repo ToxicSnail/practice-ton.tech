@@ -71,7 +71,7 @@ The `seed` is fixed within a single block, and if one bet wins, all bets in the 
 
 In reality, there will be around 500 transactions in one block.
 
-![[scheme_attack.png]]
+![scheme_attack.png]
 Node A - My main account, which forcibly initiates everything with the message `init try`.
 
 Node B - The attacking contract, which realizes that the current block has a suitable `seed`, so it starts attacking by sending message  `auto try`.
