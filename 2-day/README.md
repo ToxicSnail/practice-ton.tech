@@ -9,7 +9,7 @@ In the **TON** blockchain network, the goal was to implement a `jetton_wallet` t
 - `jetton_master` manages the created tokens and distributes them.
 - `jetton_wallet` belongs to the user and holds the token balance.
 - Tokens can be **transferred** between users.
-- The **burning mechanism has not been implemented yet**.
+- The burning mechanism has been implemented from ton/TEPS.
 
 ### Visual Diagram
 A detailed description of the `jetton_wallet` structure and workflow can be found in the image below:
@@ -27,7 +27,4 @@ A detailed description of the `jetton_wallet` structure and workflow can be foun
 2. **Deploy the sale contract** with `deploySale.ts`.
 3. **Configure the wallet** using `setJettonWallet.ts`.
 4. **Users can exchange their tokens for TON**.
-
-### Note
-The **burning mechanism has not been implemented yet**, meaning tokens cannot be destroyed to retrieve TON directly.
 
